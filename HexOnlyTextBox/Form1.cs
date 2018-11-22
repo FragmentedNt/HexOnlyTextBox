@@ -110,7 +110,8 @@ namespace HexOnlyTextBox
 
         private void updateToolStripLabel(KeyEventArgs e)
         {
-            if((Keys.D0 <= e.KeyCode && e.KeyCode <= Keys.D9)
+            // 直前に押下されたキーの確認
+            if ((Keys.D0 <= e.KeyCode && e.KeyCode <= Keys.D9)
             || (Keys.A <= e.KeyCode && e.KeyCode <= Keys.F)
             || (Keys.NumPad0 <= e.KeyCode && e.KeyCode <= Keys.NumPad9))
             {
@@ -125,7 +126,7 @@ namespace HexOnlyTextBox
             }
             else
             {
-                switch(e.KeyCode)
+                switch (e.KeyCode)
                 {
                     case Keys.Delete:
                         toolStripStatusLabel1.Text = "Pressed Delete key";
@@ -149,6 +150,26 @@ namespace HexOnlyTextBox
                         toolStripStatusLabel1.Text = "Invalaide key";
                         break;
                 }
+            }
+
+            // 入力された文字列がすべて2桁であるかの確認
+            var res = textBox1.Text.Split(' ');
+            if (res.Count() == 1)
+            {
+                toolStripStatusLabel2.Text = "Hex text is empty";
+            }
+            else if (res.Last().Count() == 1)
+            {
+                toolStripStatusLabel2.Text = "Enter the hex with 2 digits";
+            }
+            else if (res.Last().Count() == 0)
+            {
+                toolStripStatusLabel2.Text = "Hex text is available";
+            }
+            textBox2.Text = "";
+            foreach(var s in res)
+            {
+                textBox2.Text += $"\"{s}\" ";
             }
         }
     }
