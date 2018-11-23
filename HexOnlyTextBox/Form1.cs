@@ -154,13 +154,13 @@ namespace HexOnlyTextBox
 
             // 入力された文字列がすべて2桁であるかの確認
             var res = textBox1.Text.Split(' ');
-            if (res.Count() == 1)
-            {
-                toolStripStatusLabel2.Text = "Hex text is empty";
-            }
-            else if (res.Last().Count() == 1)
+            if (res.Last().Count() == 1)
             {
                 toolStripStatusLabel2.Text = "Enter the hex with 2 digits";
+            }
+            else if (res.Count() == 1)
+            {
+                toolStripStatusLabel2.Text = "Hex text is empty";
             }
             else if (res.Last().Count() == 0)
             {
