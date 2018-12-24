@@ -19,92 +19,100 @@ namespace HexOnlyTextBox
             this.textBox1.ImeMode = System.Windows.Forms.ImeMode.Disable;
         }
 
-        private void textBox1_KeyDown(object sender, KeyEventArgs e)
+        private void textBox_KeyDown_FormattedHex(object sender, KeyEventArgs e)
         {
-            e.SuppressKeyPress = true;  // 通常KeyDown後に発生するKeyPressイベントを発生させない
-            var caret = textBox1.SelectionStart;  // キャレットの位置を取得(入力フォームの ’I’)
-            var str = textBox1.Text;
-
-            if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
+            if (!sender.GetType().IsSubclassOf(typeof(TextBoxBase)))
             {
-                // 削除対象(Delならstr[caret], BSならstr[caret-1])がスペースの場合2文字分消去することに留意
-                if (e.KeyCode == Keys.Delete && caret < str.Count())
-                {
-                    if (str[caret] == ' ')
-                    {
-                        if (caret + 1 < str.Count())
-                        {
-                            str = str.Remove(caret, 2);
-                        }
-                    }
-                    else
-                    {
-                        str = str.Remove(caret, 1);
-                    }
-                }
-                else if (e.KeyCode == Keys.Back && caret > 0)
-                {
-                    if (str[caret - 1] == ' ')
-                    {
-                        if (caret - 1 > 0)
-                        {
-                            str = str.Remove(caret - 2, 2);
-                            caret -= 2;
-                        }
-                    }
-                    else
-                    {
-                        str = str.Remove(caret - 1, 1);
-                        caret -= 1;
-                    }
-                }
+                return;
             }
-            else if ((Keys.D0 <= e.KeyCode && e.KeyCode <= Keys.D9)
-                   || (Keys.A <= e.KeyCode && e.KeyCode <= Keys.F)
-                   || (Keys.NumPad0 <= e.KeyCode && e.KeyCode <= Keys.NumPad9))
+            else
             {
-                char keyChar;
-                if ((Keys.D0 <= e.KeyCode && e.KeyCode <= Keys.D9)
-                 || (Keys.A <= e.KeyCode && e.KeyCode <= Keys.F))
-                    keyChar = (char)e.KeyCode;  // 0～Zの場合はキーコードとASCIIコードが同じなのでそのままキャスト
-                else
-                    keyChar = (char)(e.KeyCode - 48);  // NumPadの場合はASCIIコードの数値と合わせるために計算
-                str = str.Insert(caret, keyChar.ToString());
-                if (caret + 1 < str.Count())
+                e.SuppressKeyPress = true;  // 通常KeyDown後に発生するKeyPressイベントを発生させない
+                var tBox = (TextBoxBase)sender;
+                var caret = tBox.SelectionStart;  // キャレットの位置を取得(入力フォームの ’I’)
+                var str = tBox.Text;
+                if (e.KeyCode == Keys.Delete || e.KeyCode == Keys.Back)
                 {
-                    if (str[caret + 1] == ' ')
-                        caret += 2;
+                    // 削除対象(Delならstr[caret], BSならstr[caret-1])がスペースの場合2文字分消去することに留意
+                    if (e.KeyCode == Keys.Delete && caret < str.Count())
+                    {
+                        if (str[caret] == ' ')
+                        {
+                            if (caret + 1 < str.Count())
+                            {
+                                str = str.Remove(caret, 2);
+                            }
+                        }
+                        else
+                        {
+                            str = str.Remove(caret, 1);
+                        }
+                    }
+                    else if (e.KeyCode == Keys.Back && caret > 0)
+                    {
+                        if (str[caret - 1] == ' ')
+                        {
+                            if (caret - 1 > 0)
+                            {
+                                str = str.Remove(caret - 2, 2);
+                                caret -= 2;
+                            }
+                        }
+                        else
+                        {
+                            str = str.Remove(caret - 1, 1);
+                            caret -= 1;
+                        }
+                    }
+                }
+                else if ((Keys.D0 <= e.KeyCode && e.KeyCode <= Keys.D9)
+                       || (Keys.A <= e.KeyCode && e.KeyCode <= Keys.F)
+                       || (Keys.NumPad0 <= e.KeyCode && e.KeyCode <= Keys.NumPad9))
+                {
+                    char keyChar;
+                    if ((Keys.D0 <= e.KeyCode && e.KeyCode <= Keys.D9)
+                     || (Keys.A <= e.KeyCode && e.KeyCode <= Keys.F))
+                        keyChar = (char)e.KeyCode;  // 0～Zの場合はキーコードとASCIIコードが同じなのでそのままキャスト
                     else
+                        keyChar = (char)(e.KeyCode - 48);  // NumPadの場合はASCIIコードの数値と合わせるために計算
+                    str = str.Insert(caret, keyChar.ToString());
+                    if (caret + 1 < str.Count())
+                    {
+                        if (str[caret + 1] == ' ')
+                            caret += 2;
+                        else
+                            caret += 1;
+                    }
+                    else
+                    {
                         caret += 1;
+                    }
                 }
-                else
+                else if (e.KeyCode == Keys.Left  // キャレットの移動に使う文字はKeyPressイベントを許可
+                      || e.KeyCode == Keys.Right
+                      || e.KeyCode == Keys.Home
+                      || e.KeyCode == Keys.End)
                 {
-                    caret += 1;
+                    e.SuppressKeyPress = false;
                 }
-            }
-            else if (e.KeyCode == Keys.Left  // キャレットの移動に使う文字はKeyPressイベントを許可
-                  || e.KeyCode == Keys.Right
-                  || e.KeyCode == Keys.Home
-                  || e.KeyCode == Keys.End)
-            {
-                e.SuppressKeyPress = false;
-            }
 
-            // 一度空白を削除し，2文字ごとに空白を挿入
-            str = str.Replace(" ", "");
-            List<char> istr = new List<char>();
-            for (int i = 0; i < str.Count(); i++)
-            {
-                istr.Add(str[i]);
-                if (i % 2 == 1)
+                // 一度空白を削除し，2文字ごとに空白を挿入
+                str = str.Replace(" ", "");
+                List<char> istr = new List<char>();
+                for (int i = 0; i < str.Count(); i++)
                 {
-                    istr.Add(' ');
+                    istr.Add(str[i]);
+                    if (i % 2 == 1)
+                    {
+                        istr.Add(' ');
+                    }
                 }
+
+                tBox.Text = new string(istr.ToArray());
+                tBox.SelectionStart = caret;
             }
 
-            textBox1.Text = new string(istr.ToArray());
-            textBox1.SelectionStart = caret;
-
+            // ↓はサンプルプログラム用なのでコピるときに消してください
             updateToolStripLabel(e);
         }
 
