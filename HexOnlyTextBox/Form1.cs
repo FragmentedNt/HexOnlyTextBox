@@ -17,6 +17,7 @@ namespace HexOnlyTextBox
             InitializeComponent();
             this.textBox1.ShortcutsEnabled = false;
             this.textBox1.ImeMode = System.Windows.Forms.ImeMode.Disable;
+            this.textBox1.KeyDown += new System.Windows.Forms.KeyEventHandler(this.textBox_KeyDown_FormattedHex);
         }
 
         private void textBox_KeyDown_FormattedHex(object sender, KeyEventArgs e)
